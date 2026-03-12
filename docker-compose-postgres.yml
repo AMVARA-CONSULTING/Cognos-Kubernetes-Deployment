@@ -1,0 +1,55 @@
+# 3 Postgres instances storing data under /data/k8-cognos/databases/
+# Reachable from Minikube at host.minikube.internal:5432, :5433, :5434
+# Start: docker compose -f docker-compose-postgres.yml up -d
+
+services:
+  nc-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: cm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - /data/k8-cognos/databases/nc:/var/lib/postgresql/data
+    ports:
+      - "25432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  audit-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: audit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - /data/k8-cognos/databases/audit:/var/lib/postgresql/data
+    ports:
+      - "25433:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  content-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: cm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - /data/k8-cognos/databases/cm:/var/lib/postgresql/data
+    ports:
+      - "25434:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

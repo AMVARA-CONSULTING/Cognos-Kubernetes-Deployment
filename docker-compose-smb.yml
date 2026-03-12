@@ -1,0 +1,26 @@
+# SMB (Samba) server for Kubernetes PV/PVC via SMB CSI driver.
+# Reachable from Minikube at host.minikube.internal:445
+# Start: docker compose -f docker-compose-smb.yml up -d
+#
+# Share: k8s-share (path /data/k8s-share inside container)
+# User: smbuser / smbpass
+
+services:
+  smb:
+    image: dperson/samba
+    container_name: smb-server
+    restart: unless-stopped
+    ports:
+      - "445:445"
+    volumes:
+      - smb-data:/data
+    environment:
+      # user;password (semicolon-separated for multiple users)
+      USER: "smbuser;smbpass"
+      # sharename;path;browseable;readonly;guest;users;admins;writelist;comment
+      SHARE: "k8s-share;/data;yes;no;no;smbuser;;smbuser;K8s SMB share"
+      USERID: "0"
+      GROUPID: "0"
+
+volumes:
+  smb-data: {}

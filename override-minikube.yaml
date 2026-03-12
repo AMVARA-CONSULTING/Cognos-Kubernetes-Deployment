@@ -1,0 +1,117 @@
+# Minikube-specific overrides for IBM Cognos Analytics Helm chart
+# Use with: helm install -f cognos_poc/values.yaml -f scripts/override-minikube.yaml ...
+#
+# Key differences from OpenShift:
+# - openshiftContext: false
+# - createLoadBalancer instead of OpenShift Route
+# - Storage: Minikube's 'standard' class (ReadWriteOnce)
+
+license:
+  accept: true
+
+image:
+  registry: icr.io/ecabeta
+
+global:
+  extraEnv:
+    test: "abc=123"
+
+serviceMonitors:
+  createMonitors: false
+
+securityContext:
+  openshiftContext: false
+
+ingress:
+  createRoute: false
+  createLoadBalancer: true 
+
+powerCube:
+  pvcEnabled: true
+  pvcStorageClassName: "smb"
+  pvcStorageAccessModes: "ReadWriteOnce"
+  pvcStorageSize: 10Gi
+
+services:
+  #
+  # Cognos Content Manager (CM) configuration section.
+  #
+  contentManagerService:
+  
+    name: elastic-ca-cm
+    digest: "sha256:5c23a587e78561a3abf7a7b18a38e19ddf04b3afae9d3bd1fc597197b6216864"
+    tag: jds3
+ 
+
+    aaaAllowAnonymous: true
+    aaaInactivityTimeout: 3599
+
+    contentDbClass: "PostgreSQL"
+    contentDbName: "cm"
+    contentDbSsl: false
+    contentDbHostname: "ca-cs"
+    contentDbPort: 5432
+    csPostgreSqlSchema: "public"
+
+    auditDbClass: "PostgreSQL"
+    auditDbName: "audit"
+    auditDbSsl: false
+    auditDbHostname: "ca-audit-store"
+    auditDbPort: 5432
+    auditPostgreSqlSchema: "public"
+
+    ncDbClass: "PostgreSQL"
+    ncDbName: "cm"
+    ncDbSsl: false
+    ncDbHostname: "ca-cs"
+    ncDbPort: 5432
+    ncPostgreSqlSchema: "public"
+
+  #
+  # Provides Ingress and affinity mapping into Cognos Analytics. No configuration changes should be required for this service.
+  caIngressService:
+    name: ca-proxy
+    tag: 12.1.1.0
+
+  #
+  # Cognos Report Service configuration section.
+  #
+  reportingService:
+    name: elastic-ca-reporting
+    digest: "sha256:500e6409761ce0f2d9db838797366bda2fb5a9a8f744c1ce08c421fa9ee6a9e1"
+    tag: jds3
+   
+  #
+  # Cognos Rest Service configuration section.
+  #
+  restService:
+    name: elastic-ca-rest
+    tag: 12.1.1.0
+
+  #
+  # Cognos UI Service configuration section.
+  #
+  uiService:
+    name: elastic-ca-ui
+    tag: 12.1.1.0
+
+  #
+  # Cognos Smarts Service configuration section.
+  #
+  smartsService:
+    name: elastic-ca-smarts
+    # digest: "e6df0a55e34c"
+    tag: 12.1.1.0
+  
+  #
+  # Cognos Dataset Service (DSS) configuration section.
+  #
+  dataService:
+    name: elastic-ca-dss
+    tag:  12.1.1.0
+    # Enable driver directory mounting via PVC (minikube standard storage)
+    driversDirPVCenabled: true
+    driversDirPVCStorageClassName: "smb"
+    driversDirPVCStorageAccessModes: "ReadWriteOnce"
+    driversDirPVCStorageSize: 10Gi
+    

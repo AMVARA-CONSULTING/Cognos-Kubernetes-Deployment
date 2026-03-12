@@ -1,0 +1,4 @@
+# Cognos on Minikube (do not commit)
+install/
+*.tar.gz
+**/nohup.out

@@ -1,0 +1,25 @@
+services:
+  demo_db:
+    # sample db populated with sample data - https://hub.docker.com/r/synthesizedio/pagila
+    image: synthesizedio/pagila:1.2-big
+    container_name: demo_db
+    environment:
+      POSTGRES_PASSWORD: demo_secret
+      POSTGRES_DB: pagila
+      POSTGRES_USER: postgres
+    ports:
+      - "15432:5432" 
+    networks:
+      - metanet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pagila"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  metanet:
+    driver: bridge
+
+volumes:
+  metabase_app_db_data:

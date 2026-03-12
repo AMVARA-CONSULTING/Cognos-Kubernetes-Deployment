@@ -1,0 +1,58 @@
+# SMB StorageClass + example PVC for use with the SMB server from docker-compose-smb.yml
+#
+# Prerequisites:
+# 1. Run SMB server: docker compose -f cognos_poc/docker-compose-smb.yml up -d
+# 2. Install SMB CSI driver in the cluster, e.g.:
+#      helm repo add csi-driver-smb https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
+#      helm install csi-driver-smb csi-driver-smb/csi-driver-smb --namespace kube-system
+#
+# From Minikube the SMB server is reached at host.minikube.internal:445
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: smbcreds
+  namespace: cognos-ns
+type: Opaque
+stringData:
+  username: "smbuser"
+  password: "smbpass"
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: smb
+provisioner: smb.csi.k8s.io
+parameters:
+  source: "//host.minikube.internal/k8s-share"
+  csi.storage.k8s.io/provisioner-secret-name: "smbcreds"
+  csi.storage.k8s.io/provisioner-secret-namespace: "cognos-ns"
+  csi.storage.k8s.io/node-stage-secret-name: "smbcreds"
+  csi.storage.k8s.io/node-stage-secret-namespace: "cognos-ns"
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=1001
+  - gid=1001
+  - noperm
+  - mfsymlinks
+  - cache=strict
+  - noserverino
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: smb-pvc-example
+  namespace: cognos-ns
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: smb
+  resources:
+    requests:
+      storage: 5Gi
