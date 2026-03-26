@@ -28,7 +28,7 @@ run() {
   fi
 }
 
-export CP_REPO_USERNAME="${CP_REPO_USERNAME:-iamapikey}"
+export CP_REPO_USERNAME="${CP_REPO_USERNAME:-iam-user}"
 export CP_REPO_PASSWORD="${CP_REPO_PASSWORD:?Set CP_REPO_PASSWORD to your IBM Cloud API key (needed for image pulls). For chart only: set HELM_CHART_PATH to use a local chart and avoid OCI fetch.}"
 export CP_REPOSITORY="${CP_REPOSITORY:-icr.io/ecabeta}"
 export CLUSTER_NAMESPACE="${CLUSTER_NAMESPACE:-cognos-ns}"
